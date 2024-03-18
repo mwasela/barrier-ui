@@ -1,6 +1,6 @@
 import { ConfigProvider, notification } from "antd";
 import { LoginForm, ProFormCheckbox, ProFormText } from "@ant-design/pro-form";
-import bsicon from "../../public/bslogo.png";
+import bsicon from "../../public/GIL_LOGO.png";
 import { useNavigate } from "react-router-dom";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
@@ -28,22 +28,26 @@ export default function Login() {
       <div
         style={{
           height: "100vh",
-          width: "100vw",
-          // position: "absolute",
-          paddingTop: "100px",
+          width: "100vw"
 
         }}
-        //
+        
       >
         <LoginForm
           //logo={gbhlIcon}
           //resize logo
+          style={{
+            paddingTop: 60
+          }}
           logo={<img src={bsicon} />}
-          //title="Door Monitor"
-          subTitle={<h2 style={{
+          //title="Barrier APP"
+          subTitle={<h1
+            style={{
             marginBlockStart: "0.2em !important",
             marginBlockEnd: "0.2em !important",
-          }}>App</h2>}
+
+          }}
+          ><strong>Barrier Control</strong></h1>}
           initialValues={{
             autoLogin: true,
           }}

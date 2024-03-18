@@ -1,7 +1,7 @@
 import ProLayout from "@ant-design/pro-layout";
-import gbhlIcon from "../public/bslogo.png";
+import gbhlIcon from "../public/GIL_LOGO.png";
 import { Outlet, Link, useNavigate } from "react-router-dom";
-import { FiBriefcase, FiUsers } from "react-icons/fi";
+import { FiBriefcase, FiLogOut, FiUsers } from "react-icons/fi";
 import React, { useEffect } from "react";
 import axios from "../helpers/axios";
 
@@ -43,14 +43,21 @@ export default function MainLayout() {
     return (
     <ProLayout
             logo={gbhlIcon}
-            title="Bulkstream Applications"
-            layout="mix"
+            title="Barrier App"
+            layout="top"         
             menuDataRender={() => [
                 {
                     path: "/",
-                    name: "Home",
+                    name: "",
                     icon: <FiBriefcase />,
                 },
+                {
+                    path: "/login",
+                    name: "Logout",
+                    icon: <FiLogOut />
+    
+
+                }
         
                 // Sample Role based views
                 // user_id && user_id === 1 &&  {
