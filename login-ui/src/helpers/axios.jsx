@@ -16,6 +16,19 @@ instance.interceptors.request.use(function (config) {
     return Promise.reject(error);
 });
 
+//interceptor to catch 401 and 403 responses and navigate to /login
+
+instance.interceptors.response.use(function (response) {
+    return response;
+}, function (error) {
+    if(error.response.status === 401 || error.response.status === 403){
+        window.location = '/login';
+    }
+    return Promise.reject(error);
+});
+
+
+
 export default instance
 
 

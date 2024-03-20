@@ -1,31 +1,20 @@
 import ProLayout from "@ant-design/pro-layout";
 import gbhlIcon from "../public/GIL_LOGO.png";
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate, Navigate } from "react-router-dom";
 import { FiBriefcase, FiLogOut, FiUsers } from "react-icons/fi";
-import React, { useEffect } from "react";
+import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from "react";
 import axios from "../helpers/axios";
+import { Dropdown } from "antd"
 
 
 
 export default function MainLayout() {
 
+    const [user, setUser] = useState([])
 
-    //const [user_id, setUser_id] = React.useState(null);
 
-    // const getUser = () => {
-    //    const request =  axios.get("/user/current");
-    //     request.then((response) => {
-    //         setUser_id(response.data.user_.blk_unittracker_users_status);
-    //         //console.log("User", response);
-    //         return response;
-    //     }).catch((error) => {
-    //         console.log(error);
-    //     });
-    
-    // }
-    // useEffect(() => {
-    //     getUser();
-    // }, []);
+
 
     
     //dfd
@@ -38,26 +27,68 @@ export default function MainLayout() {
     }, [token, navigate]);
 
 
+    const getUser = () => {
+        const request =  axios.get("/user/current");
+         request.then((response) => {
+             setUser(response.data);
+             console.log("User", response);
+             return response;
+         }).catch((error) => {
+             console.log(error);
+         });
+     
+     }
+
+
+     getUser();
+ 
+
+    
 
 
     return (
     <ProLayout
             logo={gbhlIcon}
             title="Barrier App"
-            layout="top"         
+            layout="top"   
+            avatarProps={{
+                src: "https://gw.alipayobjects.com/zos/antfincdn/efFD%24IOql2/weixintupian_20170331104822.jpg",
+                size: "small",
+                title: user.user_?.blk_users_fname + " " + user.user_?.blk_users_surname,
+                render: (props, dom) => {
+                    return (
+                        <Dropdown
+                            menu={{
+                                items: [
+                                    {
+                                        key: "logout",
+                                        icon: <LogoutOutlined />,
+                                        label: "Log Out",
+                                        onClick: () => {
+                                            navigate("/login")
+                                        },
+                                    },
+                                ],
+                            }}
+                        >
+                            {dom}
+                        </Dropdown>
+                    );
+                },
+            }}      
             menuDataRender={() => [
                 {
                     path: "/",
                     name: "",
                     icon: <FiBriefcase />,
                 },
-                {
-                    path: "/login",
-                    name: "Logout",
-                    icon: <FiLogOut />
+                // {
+                //     path: "/login",
+                //     name: "Logout",
+                //     icon: <FiLogOut />
     
 
-                }
+                // }
         
                 // Sample Role based views
                 // user_id && user_id === 1 &&  {
