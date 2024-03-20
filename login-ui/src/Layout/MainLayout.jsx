@@ -11,11 +11,7 @@ import { Dropdown } from "antd"
 
 export default function MainLayout() {
 
-    const [user, setUser] = useState([])
-
-
-
-
+    const [user, setUser] = useState(null);
     
     //dfd
     const navigate = useNavigate();
@@ -39,9 +35,10 @@ export default function MainLayout() {
      
      }
 
-
-     getUser();
- 
+     useEffect(()=>{
+        if(user) return 
+        getUser()
+     }, [user])
 
     
 
@@ -54,7 +51,7 @@ export default function MainLayout() {
             avatarProps={{
                 src: "https://gw.alipayobjects.com/zos/antfincdn/efFD%24IOql2/weixintupian_20170331104822.jpg",
                 size: "small",
-                title: user.user_?.blk_users_fname + " " + user.user_?.blk_users_surname,
+                title: user?.user_?.blk_users_fname + " " + user?.user_?.blk_users_surname,
                 render: (props, dom) => {
                     return (
                         <Dropdown
