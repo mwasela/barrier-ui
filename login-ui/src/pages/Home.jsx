@@ -50,7 +50,7 @@ export default function App() {
                 _plate: p_text,
                 _id : p_id
             });
-            console.log("request", request);
+            //console.log("request", request);
             plateRef.current.reload();
             message.success("Number Plate Updated");
             setIsModalVisible(false);
@@ -58,7 +58,7 @@ export default function App() {
             
 
         }catch(err){
-            message.error("Number Plate Update Failed");
+            //message.error("Number Plate Update Failed");
             //console.log(err);
         }
 
@@ -73,29 +73,39 @@ export default function App() {
 
 
 
-    const gateOut = async (plateNumber, theDirection, deviceID, plateColor) => {
+    // const gateOut = async (platetext,  dir) => {
+    //     console.log("plate data", platedata);
+    //     try{
+    //         const request = axios.post('/barrierLogs', {
+    //             params: {
+    //                 plate: platetext,
+    //                 direction: dir
+
+    //             }
+    //         });
+
+    //         console.log("gateout success", request);
+    //     }catch(err){
+    //         console.error(err);
+
+    //     }
+    // };
+
+    const gateOut = async (platetext, dir) => {
+        //console.log("plate data", platedata);
         try {
-            const response = await axios.post('barrierLogs', {
-                plateNumber: plateNumber,
-                direction: theDirection, // Changed TheDirection to theDirection
-                deviceID: deviceID,
-                plateColor: plateColor,
+            const request = await axios.post('/barrierLogs', {
+                plateNumber: platetext,
+                direction: dir
             });
-            //console.log("gate out", response.data);
-            message.success(plateNumber, " gated out successfully");
-            return response;
+    
+            //console.log("gateout success", request.data);
         } catch (err) {
-            console.error("Error in gateOut:", err);
-            throw err; // Throw error to handle it wherever the gateOut function is called
+            //console.error(err);
         }
     };
+    
 
-
-    // const getPlate = async() => {
-    //     try{
-    //         const request = axios.get('/recent')
-    //     }
-    // }
 
     const columns_plate = [
         {
@@ -119,7 +129,6 @@ export default function App() {
             title: 'Device ID',
             dataIndex: 'deviceID',
             key: 'deviceID',
-
         },
         {
             title: 'Time Gated Out',
@@ -217,6 +226,7 @@ export default function App() {
     return (
         <PageContainer>
             <ProCard
+                
                 style={{
                     //alignContent: "center",
                     marginBottom: "30px",
@@ -244,8 +254,9 @@ export default function App() {
                     }}
                     onFinish={
                         async (values) => {
-                            console.log("plate", plate);
-                            console.log("directions", direction);
+                            //console.log("plate", plate);
+                            //console.log("directions", direction);
+                            gateOut(plate, direction);
                             message.success(`${plate} gated out successfully`);
 
                             // const plate = values.plate;
@@ -270,6 +281,7 @@ export default function App() {
                                     const response = await axios.get('/plateInfo');
                                     const data = response.data; // Assuming the response data is an array
                                     setPlatedata(data);
+                                    //console.log("plate data", data);
                                     const options = data.map((item) => ({
                                         label: item.plateNumber, // Display plateNumber
                                         value: item.plateNumber, // Use plateNumber as value
@@ -283,35 +295,10 @@ export default function App() {
                             }}
                             onChange={(value) => {
                                 setPlate(value)
-                                //console.log("plate", value)
+                        
                             }}
                         />
 
-                        {/* <ProFormSelect
-                        name="plate"
-                        label="License Plate No:"
-                        placeholder="Please select a type"
-                        request={async (params) => {
-                            try {
-                                const response = await axios.get('/plateInfo');
-                                const data = response.data;
-                                // Filter out empty strings and map them to options
-                                const options = data.filter(item => item.trim() !== '').map((plate, index) => ({
-                                    label: plate,
-                                    value: option.plateNumber, // You can use the index as the value if needed
-                                }));
-
-                                return options;
-                            } catch (error) {
-                                console.error('Error fetching plate info:', error);
-                                return []; // Return an empty array in case of error
-                            }
-                        }}
-                        onChange={(value, option) => {
-                            console.log("plate", value)
-                            setPlate(option.value)
-                        }}
-                    /> */}
 
 
                         <ProFormSelect
