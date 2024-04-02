@@ -1,14 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import axios from "../helpers/axios";
 import ProTable from "@ant-design/pro-table";
-import { useNavigate } from "react-router-dom";
 import {
     ModalForm,
     ProFormSelect,
     ProFormText,
     ProForm,
-    ProFormDateTimePicker,
     PageContainer,
     ProCard,
 
@@ -32,6 +29,34 @@ export default function App() {
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
     const plateRef = React.createRef();
     const [platedata, setPlatedata] = useState([]);
+
+
+    useEffect(() => {
+        if (!platedata.length) { // Check if platedata is empty
+          fetchPlateData();
+        }
+       // fetchPlateData(); // Call the fetchPlateData function when component mounts
+      
+      }, [platedata]); // Empty dependency array, so this effect runs only once when the component mounts
+      // Empty dependency array ensures useEffect runs only once when component mounts
+    
+      // Generate options based on platedata
+      const options = platedata.map((item) => ({
+        label: item.plateNumber, // Display plateNumber
+        value: item.plateNumber, // Use plateNumber as value
+      }));
+    
+
+      const fetchPlateData = async () => {
+        try {
+          const response = await axios.get('/plateInfo');
+          const data = response.data; // Assuming the response data is an array
+          setPlatedata(data);
+        } catch (error) {
+          console.error('Error fetching plate info:', error);
+        }
+      };
+    
 
 
     const handleButtonClick = (record) => {
@@ -71,26 +96,6 @@ export default function App() {
     };
 
 
-
-
-    // const gateOut = async (platetext,  dir) => {
-    //     console.log("plate data", platedata);
-    //     try{
-    //         const request = axios.post('/barrierLogs', {
-    //             params: {
-    //                 plate: platetext,
-    //                 direction: dir
-
-    //             }
-    //         });
-
-    //         console.log("gateout success", request);
-    //     }catch(err){
-    //         console.error(err);
-
-    //     }
-    // };
-
     const gateOut = async (platetext, dir) => {
         //console.log("plate data", platedata);
         try {
@@ -98,6 +103,7 @@ export default function App() {
                 plateNumber: platetext,
                 direction: dir
             });
+            plateRef.current.reload();
     
             //console.log("gateout success", request.data);
         } catch (err) {
@@ -105,6 +111,17 @@ export default function App() {
         }
     };
     
+
+    // const fetchPlateData = async () => {
+    //     try {
+    //       const response = await axios.get('/plateInfo');
+    //       const data = response.data; // Assuming the response data is an array
+    //       setPlatedata(data);
+    //     } catch (error) {
+    //       console.error('Error fetching plate info:', error);
+    //     }
+    //   };
+  
 
 
     const columns_plate = [
@@ -258,6 +275,8 @@ export default function App() {
                             //console.log("directions", direction);
                             gateOut(plate, direction);
                             message.success(`${plate} gated out successfully`);
+                            plateRef.current.reload();
+                            
 
                             // const plate = values.plate;
                             // const direction = values.direction;
@@ -274,25 +293,25 @@ export default function App() {
                             name="plate"
                             label="License Plate No:"
                             placeholder="Please select a type"
+                            options={options}
+                            //use options and a use effect instead of request
+                            // request={async (params) => {
+                            //     try {
+                            //         const response = await axios.get('/plateInfo');
+                            //         const data = response.data; // Assuming the response data is an array
+                            //         setPlatedata(data);
+                            //         //console.log("plate data", data);
+                            //         const options = data.map((item) => ({
+                            //             label: item.plateNumber, // Display plateNumber
+                            //             value: item.plateNumber, // Use plateNumber as value
+                            //         }));
 
-
-                            request={async (params) => {
-                                try {
-                                    const response = await axios.get('/plateInfo');
-                                    const data = response.data; // Assuming the response data is an array
-                                    setPlatedata(data);
-                                    //console.log("plate data", data);
-                                    const options = data.map((item) => ({
-                                        label: item.plateNumber, // Display plateNumber
-                                        value: item.plateNumber, // Use plateNumber as value
-                                    }));
-
-                                    return options;
-                                } catch (error) {
-                                    //console.error('Error fetching plate info:', error);
-                                    return []; // Return an empty array in case of error
-                                }
-                            }}
+                            //         return options;
+                            //     } catch (error) {
+                            //         //console.error('Error fetching plate info:', error);
+                            //         return []; // Return an empty array in case of error
+                            //     }
+                            // }}
                             onChange={(value) => {
                                 setPlate(value)
                         
@@ -352,6 +371,8 @@ export default function App() {
                 }}
                 pagination={{
                     showSizeChanger: true,
+                    pageSize: 10,
+                    defaultCurrent: 1
                 }}
 
 

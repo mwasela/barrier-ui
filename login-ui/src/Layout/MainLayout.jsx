@@ -27,10 +27,10 @@ export default function MainLayout() {
         const request =  axios.get("/user/current");
          request.then((response) => {
              setUser(response.data);
-             console.log("User", response);
+             //console.log("User", response);
              return response;
          }).catch((error) => {
-             console.log(error);
+             //console.log(error);
          });
      
      }
