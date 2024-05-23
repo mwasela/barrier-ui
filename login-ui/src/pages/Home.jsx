@@ -29,34 +29,47 @@ export default function App() {
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
     const plateRef = React.createRef();
     const [platedata, setPlatedata] = useState([]);
+    const [comment, setComment] = useState("");
 
+
+    // useEffect(() => {
+    //     if (!platedata.length) { // Check if platedata is empty
+    //       fetchPlateData();
+    //     }
+    //    // fetchPlateData(); // Call the fetchPlateData function when component mounts
+
+    //   }, [platedata]);
 
     useEffect(() => {
-        if (!platedata.length) { // Check if platedata is empty
-          fetchPlateData();
-        }
-       // fetchPlateData(); // Call the fetchPlateData function when component mounts
-      
-      }, [platedata]); // Empty dependency array, so this effect runs only once when the component mounts
-      // Empty dependency array ensures useEffect runs only once when component mounts
-    
-      // Generate options based on platedata
-      const options = platedata.map((item) => ({
-        label: item.plateNumber, // Display plateNumber
-        value: item.plateNumber, // Use plateNumber as value
-      }));
-    
+        const interval = setInterval(() => {
+            fetchPlateData();
+        }, 10000); // 10000 milliseconds = 10 seconds
 
-      const fetchPlateData = async () => {
+        // Fetch initially when the component mounts
+        fetchPlateData();
+
+        // Cleanup interval on component unmount
+        return () => clearInterval(interval);
+    }, []);
+
+    // Generate options based on platedata
+    const options = platedata.map((item) => ({
+        label: item.blk_plates, // Display plateNumber
+        value: item.blk_plates, // Use plateNumber as value
+    }));
+
+
+    const fetchPlateData = async () => {
         try {
-          const response = await axios.get('/plateInfo');
-          const data = response.data; // Assuming the response data is an array
-          setPlatedata(data);
+            const response = await axios.get('/Plates');
+            const data = response.data; // Assuming the response data is an array
+            //console.log("plate data", data);
+            setPlatedata(data);
         } catch (error) {
-          console.error('Error fetching plate info:', error);
+            console.error('Error fetching plate info:', error);
         }
-      };
-    
+    };
+
 
 
     const handleButtonClick = (record) => {
@@ -70,19 +83,19 @@ export default function App() {
 
     const overidePlate = async (p_id, p_text) => {
 
-        try{
+        try {
             const request = await axios.put('/plate', {
                 _plate: p_text,
-                _id : p_id
+                _id: p_id
             });
             //console.log("request", request);
             plateRef.current.reload();
             message.success("Number Plate Updated");
             setIsModalVisible(false);
             handleButtonClick(p_id);
-            
 
-        }catch(err){
+
+        } catch (err) {
             //message.error("Number Plate Update Failed");
             //console.log(err);
         }
@@ -96,32 +109,25 @@ export default function App() {
     };
 
 
-    const gateOut = async (platetext, dir) => {
-        //console.log("plate data", platedata);
+    const gateOut = async (platetext, dir, _comment) => {
+        // console.log("dir", dir);
+        // console.log("platetext", platetext);
+        // console.log("_comment", _comment);
         try {
             const request = await axios.post('/barrierLogs', {
                 plateNumber: platetext,
-                direction: dir
+                direction: dir,
+                comment: JSON.stringify(_comment.currentTarget.value)
             });
             plateRef.current.reload();
-    
+
             //console.log("gateout success", request.data);
         } catch (err) {
             //console.error(err);
         }
     };
-    
 
-    // const fetchPlateData = async () => {
-    //     try {
-    //       const response = await axios.get('/plateInfo');
-    //       const data = response.data; // Assuming the response data is an array
-    //       setPlatedata(data);
-    //     } catch (error) {
-    //       console.error('Error fetching plate info:', error);
-    //     }
-    //   };
-  
+
 
 
     const columns_plate = [
@@ -141,11 +147,6 @@ export default function App() {
             title: 'Plate Color',
             dataIndex: 'plateColor',
             key: 'plateColor',
-        },
-        {
-            title: 'Device ID',
-            dataIndex: 'deviceID',
-            key: 'deviceID',
         },
         {
             title: 'Time Gated Out',
@@ -193,48 +194,53 @@ export default function App() {
             key: 'action',
             render: (_, record) => (
                 <>
-                <Button
-                icon={<ArrowRightOutlined />}
-                name="action"
-                type="primary"
-                onClick={
-                    () => {
-                        showModal(record.id);
-                    }
-                }
-                disabled={isButtonDisabled}
-            >
-                Manual Override
-            </Button>
+                    <Button
+                        icon={<ArrowRightOutlined />}
+                        name="action"
+                        type="primary"
+                        onClick={
+                            () => {
+                                showModal(record.id);
+                            }
+                        }
+                        disabled={isButtonDisabled}
+                    >
+                        Manual Override
+                    </Button>
 
-            <ModalForm
-                title="Overide"
-                open={isModalVisible}
-                
-                modalProps={{
-                    onCancel: ()=>setIsModalVisible(false),
-                    
-                    
-                }}
-                onFinish={(value)=>{
-                    // console.log("plateid", plateid)
-                    // console.log("plateText", value.platetext);
-                    overidePlate(plateid,value.platetext);
-                    handleButtonClick(record);
+                    <ModalForm
+                        title="Overide"
+                        open={isModalVisible}
+
+                        modalProps={{
+                            onCancel: () => setIsModalVisible(false),
 
 
-                }}
-            >
-            <ProFormText
-                name="platetext"
-                placeholder={record.plateNumber}
+                        }}
+                        onFinish={(value) => {
+                            // console.log("plateid", plateid)
+                            // console.log("plateText", value.platetext);
+                            overidePlate(plateid, value.platetext);
+                            handleButtonClick(record);
 
 
-                />
-            </ModalForm>
-            </>
+                        }}
+                    >
+                        <ProFormText
+                            name="platetext"
+                            placeholder={record.plateNumber}
+
+
+                        />
+                    </ModalForm>
+                </>
             ),
         },
+        {
+            title: 'Comment',
+            dataIndex: 'comment',
+            key: 'comment',
+        }
     ]
 
 
@@ -243,7 +249,7 @@ export default function App() {
     return (
         <PageContainer>
             <ProCard
-                
+
                 style={{
                     //alignContent: "center",
                     marginBottom: "30px",
@@ -271,18 +277,10 @@ export default function App() {
                     }}
                     onFinish={
                         async (values) => {
-                            //console.log("plate", plate);
-                            //console.log("directions", direction);
-                            gateOut(plate, direction);
+                            //console.log(values);
+                            gateOut(plate, direction, comment);
                             message.success(`${plate} gated out successfully`);
                             plateRef.current.reload();
-                            
-
-                            // const plate = values.plate;
-                            // const direction = values.direction;
-                            // const deviceID = values.deviceID;
-                            // const plateColor = values.plateColor;
-                            // await gateOut(plate, direction, deviceID, plateColor);
                         }
                     }
 
@@ -294,27 +292,9 @@ export default function App() {
                             label="License Plate No:"
                             placeholder="Please select a type"
                             options={options}
-                            //use options and a use effect instead of request
-                            // request={async (params) => {
-                            //     try {
-                            //         const response = await axios.get('/plateInfo');
-                            //         const data = response.data; // Assuming the response data is an array
-                            //         setPlatedata(data);
-                            //         //console.log("plate data", data);
-                            //         const options = data.map((item) => ({
-                            //             label: item.plateNumber, // Display plateNumber
-                            //             value: item.plateNumber, // Use plateNumber as value
-                            //         }));
-
-                            //         return options;
-                            //     } catch (error) {
-                            //         //console.error('Error fetching plate info:', error);
-                            //         return []; // Return an empty array in case of error
-                            //     }
-                            // }}
                             onChange={(value) => {
                                 setPlate(value)
-                        
+
                             }}
                         />
 
@@ -334,19 +314,16 @@ export default function App() {
                             }}
                         />
 
-                        {/* <Button
-                    type="primary"
-                    style={{
-                        width: "120px",
-                        marginBottom: "20px",
-                    }}
-                    onFinnish={() => {
-                        //gateOut(plate, direction)
-                        console.log(plate, direction);
-                    }}
-                >
-                    Submit
-                </Button> */}
+
+                        <ProFormText
+                            name="blk_comment"
+                            label="Comment"
+                            placeholder="Please enter a comment"
+                            onChange={(value) => {
+                                setComment(value)
+                            }}
+                        />
+
                     </ProForm.Group>
                 </ProForm>
 
@@ -365,7 +342,7 @@ export default function App() {
                     const response = await axios.get('/barrierLogs')
                     const data = response.data;
                     //console.log("vehicle", response.data)
-                    
+
                     setVehicles(data)
                     return data;
                 }}
